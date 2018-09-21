@@ -40,6 +40,7 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
 from official.datasets import movielens  # pylint: disable=g-bad-import-order
+from official.recommendation import constants as rconst
 from official.recommendation import stat_utils
 
 
@@ -62,6 +63,47 @@ def neumf_model_fn(features, labels, mode, params):
     if params["use_tpu"]:
       return tf.contrib.tpu.TPUEstimatorSpec(mode=mode, predictions=predictions)
     return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
+
+  elif mode == tf.estimator.ModeKeys.EVAL:
+    # This doesn't affect the rank-ordering of scores, but it guarantees that
+    # masked out values appear last.
+    user_scores = tf.sigmoid(logits)
+    user_scores = tf.reshape(user_scores, (-1, rconst.NUM_EVAL_NEGATIVES + 1))
+
+    dupe_mask = tf.cast(tf.reshape(features[rconst.DUPLICATE_MASK],
+                       (-1, rconst.NUM_EVAL_NEGATIVES + 1)), tf.float32)
+
+    # If a row is a padded row, all but the first element will be a duplicate.
+    metric_weights = tf.not_equal(tf.reduce_sum(dupe_mask, axis=1),
+                                  rconst.NUM_EVAL_NEGATIVES)
+
+    if params["match_mlperf"]:
+      # Mask out duplicates.
+      user_scores *= (1 - dupe_mask)
+
+    # Determine the location of the first element in each row after the elements
+    # are sorted.
+    sort_indices = tf.contrib.framework.argsort(
+        user_scores, axis=1, direction="DESCENDING")
+
+    one_hot_position = tf.cast(tf.equal(sort_indices, 0), tf.int32)
+    tiled_range = tf.tile(tf.range(user_scores.shape[1])[tf.newaxis, :],
+                          (user_scores.shape[0], 1))
+
+    position_vector = tf.reduce_sum(tf.multiply(
+        one_hot_position, tiled_range), axis=1)
+
+    in_top_k = tf.cast(tf.less(position_vector, rconst.TOP_K), tf.float32)
+    ndcg = tf.log(2.) / tf.log(tf.cast(position_vector, tf.float32) + 2)
+    ndcg *= in_top_k
+
+    return tf.estimator.EstimatorSpec(
+        mode=mode,
+        loss=tf.zeros(shape=(1,), dtype=tf.float32),
+        eval_metric_ops={
+          rconst.HR_KEY: tf.metrics.mean(in_top_k, weights=metric_weights),
+          rconst.NDCG_KEY: tf.metrics.mean(ndcg, weights=metric_weights),
+        })
 
   elif mode == tf.estimator.ModeKeys.TRAIN:
     labels = tf.cast(labels, tf.int32)

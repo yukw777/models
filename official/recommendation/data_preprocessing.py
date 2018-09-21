@@ -493,6 +493,8 @@ def make_deserialize(params, batch_size, training=False):
   }
   if training:
     feature_map["labels"] = tf.FixedLenFeature([], dtype=tf.string)
+  else:
+    feature_map[rconst.DUPLICATE_MASK] = tf.FixedLenFeature([], dtype=tf.string)
 
   def deserialize(examples_serialized):
     """Called by Dataset.map() to convert batches of records to tensors."""
@@ -506,13 +508,17 @@ def make_deserialize(params, batch_size, training=False):
       items = tf.cast(items, tf.int32)  # TPU doesn't allow uint16 infeed.
 
     if not training:
+      dupe_mask = tf.reshape(tf.cast(tf.decode_raw(
+          features[rconst.DUPLICATE_MASK], tf.int8), tf.bool), (batch_size,))
       return {
           movielens.USER_COLUMN: users,
           movielens.ITEM_COLUMN: items,
+          rconst.DUPLICATE_MASK: dupe_mask,
       }
 
     labels = tf.reshape(tf.cast(tf.decode_raw(
         features["labels"], tf.int8), tf.bool), (batch_size,))
+
     return {
         movielens.USER_COLUMN: users,
         movielens.ITEM_COLUMN: items,

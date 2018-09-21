@@ -83,3 +83,26 @@ def sample_with_exclusion(num_items, positive_set, n, replacement=True):
     # in practice tends to be quite ordered.
 
   return negatives[:n]
+
+def mask_duplicates(x, axis=1):  # type: (np.ndarray, int) -> np.ndarray
+  """Identify duplicates from sampling with replacement.
+
+  Args:
+    x: A 2D NumPy array of samples
+    axis: The axis along which to de-dupe.
+  """
+  if axis != 1:
+    raise NotImplementedError
+
+  x_sort_ind = np.argsort(x, axis=axis, kind="mergesort")
+  sorted_x = x[np.arange(x.shape[0])[:, np.newaxis], x_sort_ind]
+
+  diffs = sorted_x[:, :-1] - sorted_x[:, 1:]
+  diffs = np.concatenate(
+      [np.ones((diffs.shape[0], 1), dtype=diffs.dtype), diffs], axis=1)
+
+  inv_x_sort_ind = np.argsort(x_sort_ind, axis=1, kind="mergesort")
+
+  dupe_mask = np.where(diffs[np.arange(x.shape[0])[:, np.newaxis],
+                             inv_x_sort_ind], 0, 1)
+  return dupe_mask

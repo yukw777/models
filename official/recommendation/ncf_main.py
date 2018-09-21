@@ -274,7 +274,7 @@ def construct_estimator(num_gpus, model_dir, params, batch_size,
         model_fn=neumf_model.neumf_model_fn,
         use_tpu=False,
         train_batch_size=1,
-        predict_batch_size=eval_batch_size,
+        eval_batch_size=eval_batch_size,
         params=tpu_params,
         config=run_config)
 
@@ -305,7 +305,15 @@ def run_ncf(_):
   num_gpus = flags_core.get_num_gpus(FLAGS)
   batch_size = distribution_utils.per_device_batch_size(
       int(FLAGS.batch_size), num_gpus)
+
   eval_batch_size = int(FLAGS.eval_batch_size or FLAGS.batch_size)
+  eval_per_user = rconst.NUM_EVAL_NEGATIVES + 1
+  if eval_batch_size % eval_per_user:
+    eval_batch_size = int(eval_batch_size / eval_per_user) * eval_per_user
+    tf.logging.warning(
+        "eval examples per user does not evenly divide eval_batch_size. "
+        "Overriding to {}".format(eval_batch_size))
+
   ncf_dataset, cleanup_fn = data_preprocessing.instantiate_pipeline(
       dataset=FLAGS.dataset, data_dir=FLAGS.data_dir,
       batch_size=batch_size,
@@ -333,6 +341,7 @@ def run_ncf(_):
           "tpu": FLAGS.tpu,
           "tpu_zone": FLAGS.tpu_zone,
           "tpu_gcp_project": FLAGS.tpu_gcp_project,
+          "match_mlperf": FLAGS.ml_perf,
       }, batch_size=flags.FLAGS.batch_size, eval_batch_size=eval_batch_size)
 
   # Create hooks that log information about the training and metric values
@@ -364,7 +373,6 @@ def run_ncf(_):
     tf.logging.info("Starting a training cycle: {}/{}".format(
         cycle_index + 1, total_training_cycle))
 
-
     # Train the model
     train_input_fn, train_record_dir, batch_count = \
       data_preprocessing.make_train_input_fn(ncf_dataset=ncf_dataset)
@@ -378,9 +386,24 @@ def run_ncf(_):
                           steps=batch_count)
     tf.gfile.DeleteRecursively(train_record_dir)
 
+
+    eval_results = eval_estimator.evaluate(pred_input_fn)
+
+
+    # TODO(robieta): remove old eval approach
     # Evaluate the model
-    eval_results = evaluate_model(
+    tf.logging.info("...")
+    eval_results_2 = evaluate_model(
         eval_estimator, ncf_dataset, pred_input_fn)
+    tf.logging.info("...")
+
+    print("\n" * 3)
+    print(eval_results)
+    print(eval_results_2)
+    print("\n" * 3)
+    import sys
+    sys.stdout.flush()
+
 
     # Benchmark the evaluation results
     benchmark_logger.log_evaluation_result(eval_results)
@@ -517,6 +540,11 @@ def define_ncf_flags():
           "batches as they are produced. \nNOTE: this will significantly slow "
           "training. However it is useful to confirm that a random seed is "
           "does indeed make the data pipeline deterministic."))
+
+  @flags.validator("eval_batch_size", "eval_batch_size must be at least {}"
+                   .format(rconst.NUM_EVAL_NEGATIVES + 1))
+  def eval_size_check(eval_batch_size):
+    return int(eval_batch_size) > rconst.NUM_EVAL_NEGATIVES
 
 
 if __name__ == "__main__":
