@@ -60,7 +60,7 @@ do
                      --learning_rate 0.0005 \
                      --layers 256,256,128,64 --num_factors 64 \
                      --hr_threshold 0.635 \
-                     --ml_perf # \
+                     --ml_perf \
   |& tee ${RUN_LOG} \
   | grep --line-buffered  -E --regexp="(Iteration [0-9]+: HR = [0-9\.]+, NDCG = [0-9\.]+)|(pipeline_hash)"
 
