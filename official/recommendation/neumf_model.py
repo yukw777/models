@@ -65,10 +65,7 @@ def neumf_model_fn(features, labels, mode, params):
     return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
   elif mode == tf.estimator.ModeKeys.EVAL:
-    # This doesn't affect the rank-ordering of scores, but it guarantees that
-    # masked out values appear last.
-    user_scores = tf.sigmoid(logits)
-    user_scores = tf.reshape(user_scores, (-1, rconst.NUM_EVAL_NEGATIVES + 1))
+    logits = tf.reshape(logits, (-1, rconst.NUM_EVAL_NEGATIVES + 1))
 
     dupe_mask = tf.cast(tf.reshape(features[rconst.DUPLICATE_MASK],
                        (-1, rconst.NUM_EVAL_NEGATIVES + 1)), tf.float32)
@@ -78,17 +75,17 @@ def neumf_model_fn(features, labels, mode, params):
                                   rconst.NUM_EVAL_NEGATIVES)
 
     if params["match_mlperf"]:
-      # Mask out duplicates.
-      user_scores *= (1 - dupe_mask)
+      # Set duplicate logits to the min value for that dtype
+      logits = logits * (1 - dupe_mask) + dupe_mask * logits.dtype.min
 
     # Determine the location of the first element in each row after the elements
     # are sorted.
     sort_indices = tf.contrib.framework.argsort(
-        user_scores, axis=1, direction="DESCENDING")
+        logits, axis=1, direction="DESCENDING")
 
     one_hot_position = tf.cast(tf.equal(sort_indices, 0), tf.int32)
-    tiled_range = tf.tile(tf.range(user_scores.shape[1])[tf.newaxis, :],
-                          (user_scores.shape[0], 1))
+    tiled_range = tf.tile(tf.range(logits.shape[1])[tf.newaxis, :],
+                          (logits.shape[0], 1))
 
     position_vector = tf.reduce_sum(tf.multiply(
         one_hot_position, tiled_range), axis=1)
