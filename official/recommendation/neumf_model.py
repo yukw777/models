@@ -65,7 +65,12 @@ def neumf_model_fn(features, labels, mode, params):
     return tf.estimator.EstimatorSpec(mode=mode, predictions=predictions)
 
   elif mode == tf.estimator.ModeKeys.EVAL:
-    logits = tf.reshape(logits, (-1, rconst.NUM_EVAL_NEGATIVES + 1))
+    logits_by_user = tf.reshape(logits, (-1, rconst.NUM_EVAL_NEGATIVES + 1))
+
+    # Examples are provided by the eval Dataset in a structured format.
+    eval_labels = tf.constant(tf.reshape(tf.one_hot(
+        tf.zeros(shape=(logits_by_user.shape[0],), dtype=tf.int32),
+        logits_by_user.shape[1]), (-1,)))
 
     dupe_mask = tf.cast(tf.reshape(features[rconst.DUPLICATE_MASK],
                        (-1, rconst.NUM_EVAL_NEGATIVES + 1)), tf.float32)
@@ -76,16 +81,17 @@ def neumf_model_fn(features, labels, mode, params):
 
     if params["match_mlperf"]:
       # Set duplicate logits to the min value for that dtype
-      logits = logits * (1 - dupe_mask) + dupe_mask * logits.dtype.min
+      logits_by_user *= (1 - dupe_mask)
+      logits_by_user += dupe_mask * logits_by_user.dtype.min
 
     # Determine the location of the first element in each row after the elements
     # are sorted.
     sort_indices = tf.contrib.framework.argsort(
-        logits, axis=1, direction="DESCENDING")
+        logits_by_user, axis=1, direction="DESCENDING")
 
     one_hot_position = tf.cast(tf.equal(sort_indices, 0), tf.int32)
-    tiled_range = tf.tile(tf.range(logits.shape[1])[tf.newaxis, :],
-                          (logits.shape[0], 1))
+    tiled_range = tf.tile(tf.range(logits_by_user.shape[1])[tf.newaxis, :],
+                          (logits_by_user.shape[0], 1))
 
     position_vector = tf.reduce_sum(tf.multiply(
         one_hot_position, tiled_range), axis=1)
@@ -93,6 +99,8 @@ def neumf_model_fn(features, labels, mode, params):
     in_top_k = tf.cast(tf.less(position_vector, rconst.TOP_K), tf.float32)
     ndcg = tf.log(2.) / tf.log(tf.cast(position_vector, tf.float32) + 2)
     ndcg *= in_top_k
+
+    compute_logit_norms(eval_labels, logits, metric_weights)
 
     return tf.estimator.EstimatorSpec(
         mode=mode,
@@ -228,3 +236,39 @@ def construct_model(users, items, params):
   sys.stdout.flush()
 
   return logits
+
+def compute_logit_norms(labels, logits, metric_weights=None, prefix="norms/"):
+  abs_logits = tf.abs(logits)
+  predictions = tf.sigmoid(logits)
+
+  # A logit of zero translates to a 50% probability, or a random guess
+  # indicating that the model has no idea.
+  confidence = (tf.sigmoid(abs_logits) - 0.5) * 2
+
+  positive_labels = tf.cast(labels, tf.bool)
+  negative_labels = tf.equal(positive_labels, 0)
+
+  if metric_weights is not None:
+    positive_labels = tf.logical_and(positive_labels, metric_weights)
+    negative_labels = tf.logical_and(negative_labels, metric_weights)
+
+  return dict(
+      # Average over all examples
+      LOGIT_MEAN=tf.metrics.mean(logits, weights=metric_weights),
+      ABS_LOGIT_MEAN=tf.metrics.mean(abs_logits, weights=metric_weights),
+      PRED_MEAN=tf.metrics.mean(predictions, weights=metric_weights),
+      CONF_MEAN=tf.metrics.mean(confidence, weights=metric_weights),
+
+      # Average over all positive examples
+      POS_LOGIT_MEAN=tf.metrics.mean(logits, weights=positive_labels),
+      POS_ABS_LOGIT_MEAN=tf.metrics.mean(abs_logits, weights=positive_labels),
+      POS_PRED_MEAN=tf.metrics.mean(predictions, weights=positive_labels),
+      POS_CONF_MEAN=tf.metrics.mean(confidence, weights=positive_labels),
+
+      # Average over all negative examples
+      NEG_LOGIT_MEAN=tf.metrics.mean(logits, weights=negative_labels),
+      NEG_ABS_LOGIT_MEAN=tf.metrics.mean(abs_logits, weights=negative_labels),
+      NEG_PRED_MEAN=tf.metrics.mean(predictions, weights=negative_labels),
+      NEG_CONF_MEAN=tf.metrics.mean(confidence, weights=negative_labels),
+  )
+

@@ -58,6 +58,21 @@ HR_KEY = "HR"
 NDCG_KEY = "NDCG"
 DUPLICATE_MASK = "duplicate_mask"
 
+# See neumf_model.py for details:
+LOGIT_MEAN = "logit_mean"
+ABS_LOGIT_MEAN = "abs_logit_mean"
+PRED_MEAN = "prediction_mean"
+CONF_MEAN = "confidence_mean"
+POS_LOGIT_MEAN = "positive_example_logit_mean"
+POS_ABS_LOGIT_MEAN = "positive_example_abs_logit_mean"
+POS_PRED_MEAN = "positive_example_prediction_mean"
+POS_CONF_MEAN = "positive_example_confidence_mean"
+NEG_LOGIT_MEAN = "negative_example_logit_mean"
+NEG_ABS_LOGIT_MEAN = "negative_example_abs_logit_mean"
+NEG_PRED_MEAN = "negative_example_prediction_mean"
+NEG_CONF_MEAN = "negative_example_confidence_mean"
+
+
 # ==============================================================================
 # == Subprocess Data Generation ================================================
 # ==============================================================================
