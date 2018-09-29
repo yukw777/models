@@ -66,7 +66,8 @@ def neumf_model_fn(features, labels, mode, params):
 
   elif mode == tf.estimator.ModeKeys.EVAL:
     duplicate_mask = tf.cast(features[rconst.DUPLICATE_MASK], tf.float32)
-    return compute_eval_loss_and_metrics(logits, duplicate_mask, params["num_neg"])
+    return compute_eval_loss_and_metrics(
+        logits, duplicate_mask, params["num_neg"], params["match_mlperf"])
 
   elif mode == tf.estimator.ModeKeys.TRAIN:
     labels = tf.cast(labels, tf.int32)
@@ -196,7 +197,7 @@ def construct_model(users, items, params):
   return logits
 
 
-def compute_eval_loss_and_metrics(logits, duplicate_mask, num_training_neg):
+def compute_eval_loss_and_metrics(logits, duplicate_mask, num_training_neg, match_mlperf=False):
   # type: (tf.Tensor, tf.Tensor) -> tf.estimator.EstimatorSpec
   """Model evaluation with HR and NDCG metrics.
 
@@ -249,6 +250,7 @@ def compute_eval_loss_and_metrics(logits, duplicate_mask, num_training_neg):
       appeared for that user.
 
     num_training_neg: The number of negatives per positive during training.
+    match_mlperf: Use the MLPerf reference convention for computing rank.
 
   Returns:
     An EstimatorSpec for evaluation.
@@ -258,7 +260,7 @@ def compute_eval_loss_and_metrics(logits, duplicate_mask, num_training_neg):
   duplicate_mask_by_user = tf.reshape(duplicate_mask,
                                       (-1, rconst.NUM_EVAL_NEGATIVES + 1))
 
-  if params["match_mlperf"]:
+  if match_mlperf:
     # Set duplicate logits to the min value for that dtype. The MLPerf
     # reference dedupes during evaluation.
     logits_by_user *= (1 - duplicate_mask_by_user)
