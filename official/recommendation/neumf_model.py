@@ -306,8 +306,10 @@ def compute_eval_loss_and_metrics(logits, softmax_logits, duplicate_mask,
   # than during training. (Typically 999 to 1 vs. 4 to 1) By adjusting the
   # weights for the negative examples we compute a loss which is consistent with
   # the training data. (And provides apples-to-apples comparison)
-  example_weights = (eval_labels_float + (1 - eval_labels_float) *
-                  num_training_neg / rconst.NUM_EVAL_NEGATIVES)
+  negative_scale_factor = num_training_neg / rconst.NUM_EVAL_NEGATIVES
+  example_weights = (
+      (eval_labels_float + (1 - eval_labels_float) * negative_scale_factor) *
+      (1 + rconst.NUM_EVAL_NEGATIVES) / (1 + num_training_neg))
 
   # Tile metric weights back to logit dimensions
   expanded_metric_weights = tf.reshape(tf.tile(
