@@ -54,6 +54,10 @@ def neumf_model_fn(features, labels, mode, params):
 
   logits = construct_model(users=users, items=items, params=params)
 
+  # Softmax with the first column of ones is equivalent to sigmoid.
+  softmax_logits = tf.concat([tf.ones(logits.shape, dtype=logits.dtype),
+                              logits], axis=1)
+
   if mode == tf.estimator.ModeKeys.PREDICT:
     predictions = {
         movielens.ITEM_COLUMN: items,
@@ -67,7 +71,7 @@ def neumf_model_fn(features, labels, mode, params):
   elif mode == tf.estimator.ModeKeys.EVAL:
     duplicate_mask = tf.cast(features[rconst.DUPLICATE_MASK], tf.float32)
     return compute_eval_loss_and_metrics(
-        logits, duplicate_mask, params["num_neg"], params["match_mlperf"])
+        logits, softmax_logits, duplicate_mask, params["num_neg"], params["match_mlperf"])
 
   elif mode == tf.estimator.ModeKeys.TRAIN:
     labels = tf.cast(labels, tf.int32)
@@ -75,13 +79,9 @@ def neumf_model_fn(features, labels, mode, params):
     if params["use_tpu"]:
       optimizer = tf.contrib.tpu.CrossShardOptimizer(optimizer)
 
-    # Softmax with the first column of ones is equivalent to sigmoid.
-    logits = tf.concat([tf.ones(logits.shape, dtype=logits.dtype), logits]
-                       , axis=1)
-
     loss = tf.losses.sparse_softmax_cross_entropy(
         labels=labels,
-        logits=logits
+        logits=softmax_logits
     )
 
     global_step = tf.train.get_global_step()
@@ -197,8 +197,9 @@ def construct_model(users, items, params):
   return logits
 
 
-def compute_eval_loss_and_metrics(logits, duplicate_mask, num_training_neg, match_mlperf=False):
-  # type: (tf.Tensor, tf.Tensor) -> tf.estimator.EstimatorSpec
+def compute_eval_loss_and_metrics(logits, softmax_logits, duplicate_mask,
+                                  num_training_neg, match_mlperf=False):
+  # type: (tf.Tensor, tf.Tensor, tf.Tensor, bool) -> tf.estimator.EstimatorSpec
   """Model evaluation with HR and NDCG metrics.
 
   The evaluation protocol is to rank the test interacted item (truth items)
@@ -244,6 +245,8 @@ def compute_eval_loss_and_metrics(logits, duplicate_mask, num_training_neg, matc
       of logits is (num_users_per_batch * (1 + NUM_EVAL_NEGATIVES),) Logits
       for a user are grouped, and the first element of the group is the true
       element.
+
+    softmax_logits: The same tensor, but with ones left-appended.
 
     duplicate_mask: A vector with the same shape as logits, with a value of 1
       if the item corresponding to the logit at that position has already
@@ -306,13 +309,18 @@ def compute_eval_loss_and_metrics(logits, duplicate_mask, num_training_neg, matc
   example_weights = (eval_labels_float + (1 - eval_labels_float) *
                   num_training_neg / rconst.NUM_EVAL_NEGATIVES)
 
-  example_weights *= metric_weights  # ignore padded examples
+  # Tile metric weights back to logit dimensions
+  expanded_metric_weights = tf.reshape(tf.tile(
+      metric_weights[:, tf.newaxis], (1, rconst.NUM_EVAL_NEGATIVES + 1)), (-1,))
+
+  # ignore padded examples
+  example_weights *= tf.cast(expanded_metric_weights, tf.float32)
 
   cross_entropy = tf.losses.sparse_softmax_cross_entropy(
-      logits=logits, labels=eval_labels, weights=example_weights)
+      logits=softmax_logits, labels=eval_labels, weights=example_weights)
 
   return tf.estimator.EstimatorSpec(
-      mode=mode,
+      mode=tf.estimator.ModeKeys.EVAL,
       loss=cross_entropy,
       eval_metric_ops={
         rconst.HR_KEY: tf.metrics.mean(in_top_k, weights=metric_weights),
