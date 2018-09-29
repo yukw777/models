@@ -97,12 +97,19 @@ def mask_duplicates(x, axis=1):  # type: (np.ndarray, int) -> np.ndarray
   x_sort_ind = np.argsort(x, axis=axis, kind="mergesort")
   sorted_x = x[np.arange(x.shape[0])[:, np.newaxis], x_sort_ind]
 
-  diffs = sorted_x[:, :-1] - sorted_x[:, 1:]
-  diffs = np.concatenate(
-      [np.ones((diffs.shape[0], 1), dtype=diffs.dtype), diffs], axis=1)
-
+  # compute the indices needed to map values back to their original position.
   inv_x_sort_ind = np.argsort(x_sort_ind, axis=1, kind="mergesort")
 
-  dupe_mask = np.where(diffs[np.arange(x.shape[0])[:, np.newaxis],
-                             inv_x_sort_ind], 0, 1)
-  return dupe_mask
+  # Compute the difference of adjacent sorted elements.
+  diffs = sorted_x[:, :-1] - sorted_x[:, 1:]
+
+  # We are only interested in whether an element is zero. Therefore left padding
+  # with ones to restore the original shape is sufficient.
+  diffs = np.concatenate(
+      [np.ones((diffs.shape[0], 1), dtype=diffs.dtype), diffs], axis=axis)
+
+  # Duplicate values will have a difference of zero. By definition the first
+  # element is never a duplicate.
+  duplicate_mask = np.where(diffs[np.arange(x.shape[0])[:, np.newaxis],
+                                  inv_x_sort_ind], 0, 1)
+  return duplicate_mask

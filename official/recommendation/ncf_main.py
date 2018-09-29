@@ -337,6 +337,7 @@ def run_ncf(_):
           "model_layers": [int(layer) for layer in FLAGS.layers],
           "mf_regularization": FLAGS.mf_regularization,
           "mlp_reg_layers": [float(reg) for reg in FLAGS.mlp_regularization],
+          "num_neg": FLAGS.num_neg,
           "use_tpu": FLAGS.tpu is not None,
           "tpu": FLAGS.tpu,
           "tpu_zone": FLAGS.tpu_zone,
@@ -403,6 +404,8 @@ def run_ncf(_):
     print("\n" * 3)
     import sys
     sys.stdout.flush()
+    assert np.isclose(eval_results[rconst.HR_KEY], eval_results_2[_HR_KEY])
+    assert np.isclose(eval_results[rconst.NDCG_KEY], eval_results_2[_NDCG_KEY])
 
 
     # Benchmark the evaluation results
