@@ -12,6 +12,7 @@ from object_detection.dataset_tools import tf_record_creation_util
 flags = tf.app.flags
 flags.DEFINE_string('dicom_dir', '', 'DICOM data directory.')
 flags.DEFINE_string('label_file', '', 'label csv file')
+flags.DEFINE_string('record_name', 'pneumonia.record', 'tf record name')
 flags.DEFINE_string('output_dir', '/tmp/', 'Output data directory.')
 FLAGS = flags.FLAGS
 
@@ -109,7 +110,11 @@ def parse_labels(df):
 def main(_):
   assert FLAGS.dicom_dir, '`dicom_dir` missing.'
   assert FLAGS.label_file, '`label_file` missing.'
+  assert FLAGS.record_name, '`record_name` missing.'
   assert FLAGS.output_dir, '`output_dir` missing.'
+
+  if not os.path.isdir(FLAGS.output_dir):
+    os.mkdir(FLAGS.output_dir)
 
   df = pd.read_csv(FLAGS.label_file)
   parsed = parse_labels(df)
@@ -118,7 +123,7 @@ def main(_):
   with contextlib2.ExitStack() as tf_record_close_stack:
     output_tfrecords = tf_record_creation_util.open_sharded_output_tfrecords(
       tf_record_close_stack,
-      os.path.join(FLAGS.output_dir, 'pneumonia.record'),
+      os.path.join(FLAGS.output_dir, FLAGS.record_name),
       num_shards
     )
     for index, pid in enumerate(parsed):
