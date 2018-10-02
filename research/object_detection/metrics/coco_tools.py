@@ -151,7 +151,7 @@ class COCOEvalWrapper(cocoeval.COCOeval):
   """
 
   def __init__(self, groundtruth=None, detections=None, agnostic_mode=False,
-               iou_type='bbox'):
+               iou_type='bbox', iou_thrs=[]):
     """COCOEvalWrapper constructor.
 
     Note that for the area-based metrics to be meaningful, detection and
@@ -170,6 +170,9 @@ class COCOEvalWrapper(cocoeval.COCOeval):
                                iouType=iou_type)
     if agnostic_mode:
       self.params.useCats = 0
+
+    if iou_thrs:
+      self.params.iouThrs = iou_thrs
 
   def GetCategory(self, category_id):
     """Fetches dictionary holding category information given category id.

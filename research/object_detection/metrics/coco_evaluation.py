@@ -28,7 +28,8 @@ class CocoDetectionEvaluator(object_detection_evaluation.DetectionEvaluator):
   def __init__(self,
                categories,
                include_metrics_per_category=False,
-               all_metrics_per_category=False):
+               all_metrics_per_category=False,
+               iou_thresholds=[]):
     """Constructor.
 
     Args:
@@ -52,6 +53,7 @@ class CocoDetectionEvaluator(object_detection_evaluation.DetectionEvaluator):
     self._metrics = None
     self._include_metrics_per_category = include_metrics_per_category
     self._all_metrics_per_category = all_metrics_per_category
+    self._iou_thresholds = iou_thresholds
 
   def clear(self):
     """Clears the state to prepare for a fresh evaluation."""
@@ -206,7 +208,8 @@ class CocoDetectionEvaluator(object_detection_evaluation.DetectionEvaluator):
     coco_wrapped_detections = coco_wrapped_groundtruth.LoadAnnotations(
         self._detection_boxes_list)
     box_evaluator = coco_tools.COCOEvalWrapper(
-        coco_wrapped_groundtruth, coco_wrapped_detections, agnostic_mode=False)
+        coco_wrapped_groundtruth, coco_wrapped_detections, agnostic_mode=False,
+        iou_thrs=self._iou_thresholds)
     box_metrics, box_per_category_ap = box_evaluator.ComputeMetrics(
         include_metrics_per_category=self._include_metrics_per_category,
         all_metrics_per_category=self._all_metrics_per_category)

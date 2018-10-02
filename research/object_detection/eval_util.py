@@ -39,6 +39,8 @@ EVAL_METRICS_CLASS_DICT = {
         coco_evaluation.CocoDetectionEvaluator,
     'coco_mask_metrics':
         coco_evaluation.CocoMaskEvaluator,
+    'pneumonia_detection_metrics':
+        coco_evaluation.CocoDetectionEvaluator,
 }
 
 EVAL_DEFAULT_METRIC = 'coco_detection_metrics'
@@ -704,4 +706,6 @@ def evaluator_options_from_eval_config(eval_config):
           'include_metrics_per_category': (
               eval_config.include_metrics_per_category)
       }
+    elif eval_metric_fn_key == 'pneumonia_detection_metrics':
+      evaluator_options['iou_thresholds'] = list(np.linspace(0.4, 0.75, 8))
   return evaluator_options
