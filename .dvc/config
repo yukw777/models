@@ -1,0 +1,2 @@
+['remote "desktop"']
+url = ssh://keunwoo@peteryu.hopto.org:/home/keunwoo/dvc-storage/yukw777-tf-models
