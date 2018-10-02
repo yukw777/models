@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import pydicom
 import os
+import random
 
 from object_detection.utils import dataset_util
 from object_detection.dataset_tools import tf_record_creation_util
@@ -12,8 +13,8 @@ from object_detection.dataset_tools import tf_record_creation_util
 flags = tf.app.flags
 flags.DEFINE_string('dicom_dir', '', 'DICOM data directory.')
 flags.DEFINE_string('label_file', '', 'label csv file')
-flags.DEFINE_string('record_name', '', 'tf record name')
 flags.DEFINE_string('output_dir', '/tmp/', 'Output data directory.')
+flags.DEFINE_float('eval_perct', 0.2, 'What percentage of data is eval')
 FLAGS = flags.FLAGS
 
 
@@ -107,31 +108,39 @@ def parse_labels(df):
   return parsed
 
 
+def _create_tf_record_from_rsna_set(parsed, pids, num_shards, record_name):
+  with contextlib2.ExitStack() as tf_record_close_stack:
+    output_tfrecords = tf_record_creation_util.open_sharded_output_tfrecords(
+      tf_record_close_stack,
+      os.path.join(FLAGS.output_dir, record_name),
+      num_shards
+    )
+    for index, pid in enumerate(pids):
+      data = parsed[pid]
+      tf_example = create_tf_example(
+        FLAGS.dicom_dir, pid, data['label'], data['boxes'])
+      output_shard_index = index % num_shards
+      output_tfrecords[output_shard_index].write(tf_example.SerializeToString())
+
+
 def main(_):
   assert FLAGS.dicom_dir, '`dicom_dir` missing.'
   assert FLAGS.label_file, '`label_file` missing.'
-  assert FLAGS.record_name, '`record_name` missing.'
-  assert FLAGS.output_dir, '`output_dir` missing.'
 
   if not os.path.isdir(FLAGS.output_dir):
     os.mkdir(FLAGS.output_dir)
 
   df = pd.read_csv(FLAGS.label_file)
   parsed = parse_labels(df)
+  pids = list(parsed.keys())
+  random.shuffle(pids)
+  split = int(len(pids) * FLAGS.eval_perct)
+  eval_pids = pids[:split]
+  train_pids = pids[split:]
   num_shards=10
 
-  with contextlib2.ExitStack() as tf_record_close_stack:
-    output_tfrecords = tf_record_creation_util.open_sharded_output_tfrecords(
-      tf_record_close_stack,
-      os.path.join(FLAGS.output_dir, FLAGS.record_name),
-      num_shards
-    )
-    for index, pid in enumerate(parsed):
-      data = parsed[pid]
-      tf_example = create_tf_example(
-        FLAGS.dicom_dir, pid, data['label'], data['boxes'])
-      output_shard_index = index % num_shards
-      output_tfrecords[output_shard_index].write(tf_example.SerializeToString())
+  _create_tf_record_from_rsna_set(parsed, train_pids, num_shards, 'pneumonia_train.record')
+  _create_tf_record_from_rsna_set(parsed, eval_pids, num_shards, 'pneumonia_eval.record')
 
 if __name__ == '__main__':
   tf.app.run()
