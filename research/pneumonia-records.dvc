@@ -1,0 +1,13 @@
+cmd: python object_detection/dataset_tools/create_pneumonia_tf_record.py --dicom_dir
+  object_detection/pneumonia/data/stage_1_train_images --label_file object_detection/pneumonia/data/stage_1_train_labels.csv
+  --output_dir object_detection/pneumonia/data/records
+deps:
+- md5: 6aa63ab45bc10dfccc5f5605f2dc2f30.dir
+  path: object_detection/pneumonia/data/stage_1_train_images
+- md5: bb2c8606865c57034699238ac959e8aa
+  path: object_detection/pneumonia/data/stage_1_train_labels.csv
+md5: 9993e7ec0feb651b4c364803383e8df4
+outs:
+- cache: true
+  md5: 00702609188f88f33cab032939952e75.dir
+  path: object_detection/pneumonia/data/records
