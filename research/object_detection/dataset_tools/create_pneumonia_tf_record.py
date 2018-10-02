@@ -12,7 +12,7 @@ from object_detection.dataset_tools import tf_record_creation_util
 flags = tf.app.flags
 flags.DEFINE_string('dicom_dir', '', 'DICOM data directory.')
 flags.DEFINE_string('label_file', '', 'label csv file')
-flags.DEFINE_string('record_name', 'pneumonia.record', 'tf record name')
+flags.DEFINE_string('record_name', '', 'tf record name')
 flags.DEFINE_string('output_dir', '/tmp/', 'Output data directory.')
 FLAGS = flags.FLAGS
 
