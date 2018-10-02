@@ -1,3 +1,5 @@
 ['remote "desktop"']
 url = ssh://keunwoo@peteryu.hopto.org:/home/keunwoo/dvc-storage/yukw777-tf-models
 port = 4243
+['remote "local"']
+url = /home/keunwoo/dvc-storage/yukw777-tf-models/
