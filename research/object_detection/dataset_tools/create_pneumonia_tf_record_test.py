@@ -109,7 +109,7 @@ class CreateKittiTFRecordTest(tf.test.TestCase):
     self._assertProtoEqual(
       example.features.feature['image/source_id'].bytes_list.value, [pid.encode('utf8')])
     self._assertProtoEqual(
-      example.features.feature['image/format'].bytes_list.value, [b'raw'])
+      example.features.feature['image/format'].bytes_list.value, [b'jpeg'])
     self._assertProtoEqual(
       example.features.feature['image/object/bbox/xmin'].float_list.value,
       [b['x'] / width for b in boxes])

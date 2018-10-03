@@ -6,8 +6,8 @@ deps:
   path: object_detection/pneumonia/data/stage_1_train_images
 - md5: bb2c8606865c57034699238ac959e8aa
   path: object_detection/pneumonia/data/stage_1_train_labels.csv
-md5: 9993e7ec0feb651b4c364803383e8df4
+md5: 4554cf84b1dfbdef09b7d3a70430d0d0
 outs:
 - cache: true
-  md5: 00702609188f88f33cab032939952e75.dir
+  md5: 6b2040f153af78a1092db56a59c56096.dir
   path: object_detection/pneumonia/data/records

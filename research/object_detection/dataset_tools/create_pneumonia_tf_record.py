@@ -38,8 +38,8 @@ def create_tf_example(dicom_dir, pid, label, boxes):
   width, height = dcm.pixel_array.shape
 
   # convert from gray scale to 3-channel RGB
-  encoded_image_data = np.stack([dcm.pixel_array] * 3, axis=2).tobytes()
-  image_format = b'raw'
+  encoded_image_data = pydicom.encaps.defragment_data(dcm.PixelData)
+  image_format = b'jpeg'
 
   xmins = [] # List of normalized left x coordinates in bounding box (1 per box)
   xmaxs = [] # List of normalized right x coordinates in bounding box
