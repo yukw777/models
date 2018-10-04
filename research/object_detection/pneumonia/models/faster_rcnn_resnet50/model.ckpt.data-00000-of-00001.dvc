@@ -1,0 +1,5 @@
+md5: 8f0791d61bf719ca11ae8a0c51276189
+outs:
+- cache: true
+  md5: 239010ef7f3676d2b61fd77ed0104f10
+  path: model.ckpt.data-00000-of-00001
