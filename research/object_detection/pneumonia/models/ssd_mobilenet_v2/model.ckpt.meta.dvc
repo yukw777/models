@@ -1,0 +1,5 @@
+md5: 53e9079590520235b67aaa9d922a6c23
+outs:
+- cache: true
+  md5: 730f436a685465fbbbd96ac345fd1d5c
+  path: model.ckpt.meta
