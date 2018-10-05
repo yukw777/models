@@ -1,7 +1,6 @@
 import tensorflow as tf
 import contextlib2
 import pandas as pd
-import numpy as np
 import pydicom
 import os
 import random
