@@ -12,7 +12,7 @@ from matplotlib import pyplot as plt
 
 
 def load_dcm_into_numpy_array(dcm):
-  (im_width, im_height) = dcm.pixel_array.size
+  (im_width, im_height) = dcm.pixel_array.shape
   return dcm.pixel_array.reshape((im_height, im_width, 3))
 
 
