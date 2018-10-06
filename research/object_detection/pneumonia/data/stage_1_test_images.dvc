@@ -1,0 +1,5 @@
+md5: 9c92979517990704b3a506f91384f896
+outs:
+- cache: true
+  md5: 358375db3f3d441f321efe172de12f49.dir
+  path: stage_1_test_images
