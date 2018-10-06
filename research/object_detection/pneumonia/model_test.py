@@ -6,9 +6,7 @@ import os
 import pydicom
 
 from utils import label_map_util
-from utils import visualization_utils as vis_util
 from object_detection.utils import ops as utils_ops
-from matplotlib import pyplot as plt
 
 
 def load_dcm_into_numpy_array(dcm):
@@ -81,7 +79,6 @@ if __name__ == '__main__':
   parser.add_argument('label_map', help='path to the label map')
   parser.add_argument('test_dir', help='path to directory with test DICOMs')
   parser.add_argument('submission', help='path to the Kaggle submission file')
-  parser.add_argument('-s', '--num-show', help='number of sample images to show', default=0)
   args = parser.parse_args()
 
   # load the categories
@@ -96,17 +93,6 @@ if __name__ == '__main__':
   # run the inference
   for image in test_images[:5]:
   # for image in test_images:
-    dcm = pydicom.read_file(image)
+    test_dcm = pydicom.read_file(image)
     output = run_inference_for_single_image(
-      load_dcm_into_numpy_array(dcm), frozen_graph)
-    vis_util.visualize_boxes_and_labels_on_image_array(
-      dcm.pixel_array,
-      output['detection_boxes'],
-      output['detection_classes'],
-      output['detection_scores'],
-      category_index,
-      instance_masks=output.get('detection_masks'),
-      use_normalized_coordinates=True,
-      line_thickness=8
-    )
-    plt.figure(figsize=(12, 8))
+      load_dcm_into_numpy_array(test_dcm), frozen_graph)
