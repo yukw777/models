@@ -12,8 +12,9 @@ from matplotlib import pyplot as plt
 
 
 def load_dcm_into_numpy_array(dcm):
+  im = np.stack([dcm.pixel_array] * 3, axis=2)
   (im_width, im_height) = dcm.pixel_array.shape
-  return dcm.pixel_array.reshape((im_height, im_width, 3))
+  return im.reshape((im_height, im_width, 3))
 
 
 def run_inference_for_single_image(pixels, graph):
