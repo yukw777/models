@@ -11,6 +11,11 @@ from object_detection.utils import ops as utils_ops
 from matplotlib import pyplot as plt
 
 
+def load_dcm_into_numpy_array(dcm):
+  (im_width, im_height) = dcm.pixel_array.size
+  return dcm.pixel_array.reshape((im_height, im_width, 3))
+
+
 def run_inference_for_single_image(pixels, graph):
   with graph.as_default():
     with tf.Session() as sess:
@@ -91,7 +96,8 @@ if __name__ == '__main__':
   for image in test_images[:5]:
   # for image in test_images:
     dcm = pydicom.read_file(image)
-    output = run_inference_for_single_image(dcm.pixel_array, frozen_graph)
+    output = run_inference_for_single_image(
+      load_dcm_into_numpy_array(dcm), frozen_graph)
     vis_util.visualize_boxes_and_labels_on_image_array(
       dcm.pixel_array,
       output['detection_boxes'],
