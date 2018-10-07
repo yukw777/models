@@ -1,5 +1,6 @@
 import argparse
 import numpy as np
+import pandas as pd
 import tensorflow as tf
 import glob
 import os
@@ -90,9 +91,23 @@ if __name__ == '__main__':
   # gather test DICOM images
   test_images = glob.glob(os.path.join(args.test_dir, '*.dcm'))
 
-  # run the inference
-  for image in test_images[:5]:
-  # for image in test_images:
-    test_dcm = pydicom.read_file(image)
-    output = run_inference_for_single_image(
-      load_dcm_into_numpy_array(test_dcm), frozen_graph)
+  # run the inference and generate a submission file
+  submit_dict = {'patientId': [], 'PredictionString': []}
+  for image in test_images:
+    dcm = pydicom.read_file(image)
+    image_np = load_dcm_into_numpy_array(dcm)
+    output = run_inference_for_single_image(image_np, frozen_graph)
+
+    submit_dict['patientId'].append(os.path.splitext(os.path.basename(image))[0])
+    boxes = []
+    for score, box in zip(output['detection_scores'], output['detection_boxes']):
+      im_width, im_height = image_np.shape
+      ymin, xmin, ymax, xmax = box
+      x = xmin * im_width
+      y = ymin * im_height
+      w = xmax * im_width - x
+      h = ymax * im_height - y
+      boxes.append('{0} {1} {2} {3} {4}'.format(score, x, y, w, h))
+    submit_dict['PredictionString'].append(' '.join(boxes))
+
+  pd.DataFrame(submit_dict).to_csv(args.submission, index=False)
