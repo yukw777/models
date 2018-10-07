@@ -80,6 +80,10 @@ def load_tf_graph(graph):
   return detection_graph
 
 
+def batchify(l, batch_size):
+  return [l[i:i + batch_size] for i in range(0, len(l), batch_size)]
+
+
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('frozen_graph', help='path to the exported frozen graph')
