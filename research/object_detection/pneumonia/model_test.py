@@ -53,13 +53,8 @@ def run_inference_for_image_batch(batch, graph):
                              feed_dict={image_tensor: batch})
 
       # all outputs are float32 numpy arrays, so convert types as appropriate
-      output_dict['num_detections'] = int(output_dict['num_detections'][0])
-      output_dict['detection_classes'] = output_dict[
-          'detection_classes'][0].astype(np.uint8)
-      output_dict['detection_boxes'] = output_dict['detection_boxes'][0]
-      output_dict['detection_scores'] = output_dict['detection_scores'][0]
-      if 'detection_masks' in output_dict:
-        output_dict['detection_masks'] = output_dict['detection_masks'][0]
+      output_dict['num_detections'] = [int(d) for d in output_dict['num_detections']]
+      output_dict['detection_classes'] = [c.astype(np.uint8) for c in output_dict['detection_classes']]
   return output_dict
 
 
