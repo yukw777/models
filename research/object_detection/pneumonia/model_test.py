@@ -12,11 +12,11 @@ from object_detection.utils import ops as utils_ops
 
 def load_dcm_into_numpy_array(dcm):
   im = np.stack([dcm.pixel_array] * 3, axis=2)
-  (im_width, im_height) = dcm.pixel_array.shape
+  im_width, im_height = dcm.pixel_array.shape
   return im.reshape((im_height, im_width, 3))
 
 
-def run_inference_for_single_image(pixels, graph):
+def run_inference_for_image_batch(batch, graph):
   with graph.as_default():
     with tf.Session() as sess:
       # Get handles to input and output tensors
@@ -40,7 +40,7 @@ def run_inference_for_single_image(pixels, graph):
         detection_boxes = tf.slice(detection_boxes, [0, 0], [real_num_detection, -1])
         detection_masks = tf.slice(detection_masks, [0, 0, 0], [real_num_detection, -1, -1])
         detection_masks_reframed = utils_ops.reframe_box_masks_to_image_masks(
-            detection_masks, detection_boxes, pixels.shape[0], pixels.shape[1])
+            detection_masks, detection_boxes, batch[0].shape[0], batch[0].shape[1])
         detection_masks_reframed = tf.cast(
             tf.greater(detection_masks_reframed, 0.5), tf.uint8)
         # Follow the convention by adding back the batch dimension
@@ -50,7 +50,7 @@ def run_inference_for_single_image(pixels, graph):
 
       # Run inference
       output_dict = sess.run(tensor_dict,
-                             feed_dict={image_tensor: np.expand_dims(pixels, 0)})
+                             feed_dict={image_tensor: batch})
 
       # all outputs are float32 numpy arrays, so convert types as appropriate
       output_dict['num_detections'] = int(output_dict['num_detections'][0])
@@ -62,6 +62,17 @@ def run_inference_for_single_image(pixels, graph):
         output_dict['detection_masks'] = output_dict['detection_masks'][0]
   return output_dict
 
+
+def run_inference_for_single_image(image, graph):
+  batch_output_dict = run_inference_for_image_batch(np.expand_dims(image, 0), graph)
+  output_dict = {}
+  output_dict['num_detections'] = batch_output_dict['num_detections'][0]
+  output_dict['detection_classes'] = batch_output_dict['detection_classes'][0]
+  output_dict['detection_boxes'] = batch_output_dict['detection_boxes'][0]
+  output_dict['detection_scores'] = batch_output_dict['detection_scores'][0]
+  if 'detection_masks' in output_dict:
+    output_dict['detection_masks'] = batch_output_dict['detection_masks'][0]
+  return output_dict
 
 def load_tf_graph(graph):
   detection_graph = tf.Graph()
