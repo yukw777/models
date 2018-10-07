@@ -1,0 +1,5 @@
+md5: 840d59647891a060b2f3d46360dab605
+outs:
+- cache: true
+  md5: db581a89eb555b99edd5d16b059c355a.dir
+  path: tested_images
