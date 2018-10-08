@@ -97,6 +97,7 @@ if __name__ == '__main__':
   parser.add_argument('-b', '--batch-size', help='test batch size, default 8', type=int, default=8)
   parser.add_argument('-g', '--ground-truth',
     help='path to file with groundtruths in the Kaggle format')
+  parser.add_argument('--max-boxes', help='max boxes to print', type=int, default=10)
   args = parser.parse_args()
 
   # load the categories
@@ -139,7 +140,7 @@ if __name__ == '__main__':
           category_index,
           instance_masks=instance_masks,
           use_normalized_coordinates=True,
-          max_boxes_to_draw=3,
+          max_boxes_to_draw=args.max_boxes,
           min_score_thresh=0.0001
       )
 
