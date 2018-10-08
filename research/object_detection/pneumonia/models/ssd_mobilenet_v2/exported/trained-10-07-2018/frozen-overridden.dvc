@@ -1,5 +1,5 @@
-md5: fca5bcccf1e7e3cecccce8e259cecd8f
+md5: 07517b8dc86a6efed6680eb220e7133b
 outs:
 - cache: true
-  md5: 0bfba1747e5385fac32735d1378a7b14.dir
-  path: pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/frozen-overridden
+  md5: e48715012c00965014e3183e8eb19ede.dir
+  path: frozen-overridden
