@@ -5,9 +5,12 @@ import tensorflow as tf
 import glob
 import os
 import pydicom
+from tqdm import tqdm
 
 from utils import label_map_util
+from utils import visualization_utils as vis_util
 from object_detection.utils import ops as utils_ops
+from PIL import Image
 
 
 def load_dcm_into_numpy_array(dcm):
@@ -90,6 +93,10 @@ if __name__ == '__main__':
   parser.add_argument('label_map', help='path to the label map')
   parser.add_argument('test_dir', help='path to directory with test DICOMs')
   parser.add_argument('submission', help='path to the Kaggle submission file')
+  parser.add_argument('output_dir', help='path to dir for tested images')
+  parser.add_argument('-b', '--batch-size', help='test batch size, default 8', type=int, default=8)
+  parser.add_argument('-g', '--ground-truth',
+    help='path to file with groundtruths in the Kaggle format')
   args = parser.parse_args()
 
   # load the categories
@@ -101,23 +108,58 @@ if __name__ == '__main__':
   # gather test DICOM images
   test_images = glob.glob(os.path.join(args.test_dir, '*.dcm'))
 
+  # create the outputdir if it doesn't exist already
+  if not os.path.exists(args.output_dir):
+    os.mkdir(args.output_dir)
+
+  for batch in tqdm(batchify(test_images, args.batch_size)):
+    # create a numpy array of the current batch
+    image_nps = []
+    for image in batch:
+      dcm = pydicom.read_file(image)
+      image_nps.append(load_dcm_into_numpy_array(dcm))
+
+    # run the inference on the batch
+    output = run_inference_for_image_batch(np.stack(image_nps), frozen_graph)
+
+    # draw the detection boxes
+    # TODO: draw the ground truth boxes if available
+    for i in range(args.batch_size):
+      instance_masks = output.get('detection_masks')
+      if instance_masks:
+          instance_masks = instance_masks[i]
+      vis_util.visualize_boxes_and_labels_on_image_array(
+          image_nps[i],
+          output['detection_boxes'][i],
+          output['detection_classes'][i],
+          output['detection_scores'][i],
+          category_index,
+          instance_masks=instance_masks,
+          use_normalized_coordinates=True,
+          max_boxes_to_draw=3,
+          min_score_thresh=0.0001
+      )
+
+    # save the tested images
+    for image_np, image in zip(image_nps, batch):
+      im = Image.fromarray(image_np)
+      im.save(os.path.join(args.output_dir, os.path.splitext(os.path.basename(image))[0] + '.jpg'))
   # run the inference and generate a submission file
-  submit_dict = {'patientId': [], 'PredictionString': []}
-  for image in test_images:
-    dcm = pydicom.read_file(image)
-    image_np = load_dcm_into_numpy_array(dcm)
-    output = run_inference_for_single_image(image_np, frozen_graph)
+  # submit_dict = {'patientId': [], 'PredictionString': []}
+  # for image in test_images:
+    # dcm = pydicom.read_file(image)
+    # image_np = load_dcm_into_numpy_array(dcm)
+    # output = run_inference_for_single_image(image_np, frozen_graph)
 
-    submit_dict['patientId'].append(os.path.splitext(os.path.basename(image))[0])
-    boxes = []
-    for score, box in zip(output['detection_scores'], output['detection_boxes']):
-      im_width, im_height = image_np.shape
-      ymin, xmin, ymax, xmax = box
-      x = xmin * im_width
-      y = ymin * im_height
-      w = xmax * im_width - x
-      h = ymax * im_height - y
-      boxes.append('{0} {1} {2} {3} {4}'.format(score, x, y, w, h))
-    submit_dict['PredictionString'].append(' '.join(boxes))
-
-  pd.DataFrame(submit_dict).to_csv(args.submission, index=False)
+    # submit_dict['patientId'].append(os.path.splitext(os.path.basename(image))[0])
+    # boxes = []
+    # for score, box in zip(output['detection_scores'], output['detection_boxes']):
+      # im_width, im_height = image_np.shape
+      # ymin, xmin, ymax, xmax = box
+      # x = xmin * im_width
+      # y = ymin * im_height
+      # w = xmax * im_width - x
+      # h = ymax * im_height - y
+      # boxes.append('{0} {1} {2} {3} {4}'.format(score, x, y, w, h))
+    # submit_dict['PredictionString'].append(' '.join(boxes))
+  # pd.DataFrame(submit_dict).to_csv(args.submission, index=False)
