@@ -112,6 +112,9 @@ if __name__ == '__main__':
   if not os.path.exists(args.output_dir):
     os.mkdir(args.output_dir)
 
+  # dictionary for submission file
+  submit_dict = {'patientId': [], 'PredictionString': []}
+
   for batch in tqdm(batchify(test_images, args.batch_size)):
     # create a numpy array of the current batch
     image_nps = []
@@ -140,26 +143,28 @@ if __name__ == '__main__':
           min_score_thresh=0.0001
       )
 
+    def get_patient_id(image):
+      return os.path.splitext(os.path.basename(image))[0]
+
     # save the tested images
     for image_np, image in zip(image_nps, batch):
       im = Image.fromarray(image_np)
-      im.save(os.path.join(args.output_dir, os.path.splitext(os.path.basename(image))[0] + '.jpg'))
-  # run the inference and generate a submission file
-  # submit_dict = {'patientId': [], 'PredictionString': []}
-  # for image in test_images:
-    # dcm = pydicom.read_file(image)
-    # image_np = load_dcm_into_numpy_array(dcm)
-    # output = run_inference_for_single_image(image_np, frozen_graph)
+      im.save(os.path.join(args.output_dir, get_patient_id(image) + '.jpg'))
 
-    # submit_dict['patientId'].append(os.path.splitext(os.path.basename(image))[0])
-    # boxes = []
-    # for score, box in zip(output['detection_scores'], output['detection_boxes']):
-      # im_width, im_height = image_np.shape
-      # ymin, xmin, ymax, xmax = box
-      # x = xmin * im_width
-      # y = ymin * im_height
-      # w = xmax * im_width - x
-      # h = ymax * im_height - y
-      # boxes.append('{0} {1} {2} {3} {4}'.format(score, x, y, w, h))
-    # submit_dict['PredictionString'].append(' '.join(boxes))
-  # pd.DataFrame(submit_dict).to_csv(args.submission, index=False)
+    # update the submission dictionary for this batch
+    for i, (image_np, image) in enumerate(zip(image_nps, batch)):
+      submit_dict['patientId'].append(os.path.splitext(os.path.basename(image))[0])
+      boxes = []
+      for score, box in zip(
+        output['detection_scores'][i], output['detection_boxes'][i]):
+        if score == 0:
+            continue
+        im_width, im_height, _ = image_np.shape
+        ymin, xmin, ymax, xmax = box
+        x = xmin * im_width
+        y = ymin * im_height
+        w = xmax * im_width - x
+        h = ymax * im_height - y
+        boxes.append('{0} {1} {2} {3} {4}'.format(score, x, y, w, h))
+      submit_dict['PredictionString'].append(' '.join(boxes))
+  pd.DataFrame(submit_dict).to_csv(args.submission, index=False)
