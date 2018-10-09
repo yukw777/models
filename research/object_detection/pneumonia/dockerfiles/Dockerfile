@@ -18,7 +18,7 @@ FROM tensorflow/tensorflow:latest-devel-gpu-py3
 
 # Get the forked tensorflow models research directory, and move it into tensorflow
 # source folder to match recommendation of installation
-RUN git clone --depth 1 https://github.com/yukw777/models.git /models
+RUN git clone --depth 1 https://github.com/yukw777/models.git /yukw777-tf-models
 
 
 # Install the Tensorflow Object Detection API from here
@@ -35,7 +35,7 @@ RUN apt-get update && apt-get install -y protobuf-compiler python-pil python-lxm
 RUN git clone --depth 1 https://github.com/cocodataset/cocoapi.git && \
     cd cocoapi/PythonAPI && \
     make -j8 && \
-    cp -r pycocotools /models/research && \
+    cp -r pycocotools /yukw777-tf-models/research && \
     cd ../../ && \
     rm -rf cocoapi
 
@@ -47,16 +47,15 @@ RUN curl -OL "https://github.com/google/protobuf/releases/download/v3.0.0/protoc
     rm -rf proto3 protoc-3.0.0-linux-x86_64.zip
 
 # Run protoc on the object detection repo
-RUN cd /models/research && \
+RUN cd /yukw777-tf-models/research && \
     protoc object_detection/protos/*.proto --python_out=.
 
 # Set the PYTHONPATH to finish installing the API
-ENV PYTHONPATH $PYTHONPATH:/models/research:/models/research/slim
+ENV PYTHONPATH $PYTHONPATH:/yukw777-tf-models/research:/yukw777-tf-models/research/slim
 
 
 # Install wget (to make life easier below) and editors (to allow people to edit
 # the files inside the container)
 RUN apt-get install -y wget vim emacs nano
 
-WORKDIR /models
-ENTRYPOINT [ "python", "research/object_detection/model_main.py" ]
+WORKDIR /yukw777-tf-models
