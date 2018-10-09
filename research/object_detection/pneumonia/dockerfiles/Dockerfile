@@ -59,3 +59,8 @@ ENV PYTHONPATH $PYTHONPATH:/yukw777-tf-models/research:/yukw777-tf-models/resear
 RUN apt-get install -y wget vim emacs nano
 
 WORKDIR /yukw777-tf-models
+
+# Install additional dependencies
+RUN pip install pandas && \
+    pip install pydicom && \
+    pip install tqdm
