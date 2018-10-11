@@ -95,9 +95,7 @@ if __name__ == '__main__':
   parser.add_argument('submission', help='path to the Kaggle submission file')
   parser.add_argument('output_dir', help='path to dir for tested images')
   parser.add_argument('-b', '--batch-size', help='test batch size, default 8', type=int, default=8)
-  parser.add_argument('-g', '--ground-truth',
-    help='path to file with groundtruths in the Kaggle format')
-  parser.add_argument('--max-boxes', help='max boxes to print', type=int, default=10)
+  parser.add_argument('--max-boxes', help='max boxes to print, default 10', type=int, default=10)
   args = parser.parse_args()
 
   # load the categories
