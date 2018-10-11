@@ -1,0 +1,20 @@
+cmd: "python object_detection/export_inference_graph.py --pipeline_config_path=object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/pipeline.config\
+  \ --trained_checkpoint_prefix=object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/model.ckpt-47561\
+  \ --output_directory=object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/frozen-submission\
+  \ --config_override=\"\nmodel {\n  ssd {\n    post_processing {\n      batch_non_max_suppression\
+  \ {\n        score_threshold: 0.2\n        iou_threshold: 0.1\n        max_detections_per_class:\
+  \ 10\n        max_total_detections: 10\n      }\n    }\n  }\n}\""
+deps:
+- md5: 25082eb999af28937f4951bfd0c642a3
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/pipeline.config
+- md5: d5a0a63899930f91e8be8d176154ae5b
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/model.ckpt-47561.data-00000-of-00001
+- md5: bf4ada8582bffe50a905b6c34cbb27e7
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/model.ckpt-47561.index
+- md5: 1156eab330c9b3d2408c11c26c099592
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/model.ckpt-47561.meta
+md5: 9ecb8d942790f97e5d9a23170a511df4
+outs:
+- cache: true
+  md5: 34c4bd544fea6528a6cdb7b6a2169083.dir
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/frozen-submission
