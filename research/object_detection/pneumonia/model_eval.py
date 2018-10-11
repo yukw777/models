@@ -16,11 +16,15 @@ def read_tf_records(eval_file, label_map_path, batch_size):
   input_reader_config.label_map_path = label_map_path
   input_reader_config.shuffle = False
   input_reader_config.num_epochs = 1
-  input_reader_config.tf_record_input_reader = input_reader_pb2.TFRecordInputReader()
-  input_reader_config.tf_record_input_reader.input_path = [eval_file]
+  input_reader_config.tf_record_input_reader.input_path.extend([eval_file])
 
   dataset = build(input_reader_config, batch_size=batch_size)
-  return datasrt.make_one_shot_iterator()
+  iterator = dataset.make_initializable_iterator()
+  while True:
+    try:
+      yield iterator.get_next()
+    except tf.errors.OutOfRangeError:
+      return
 
 
 if __name__ == '__main__':
@@ -40,5 +44,5 @@ if __name__ == '__main__':
   # load the frozen graph
   frozen_graph = load_tf_graph(args.frozen_graph)
 
-  for batch in read_tf_records(args.eval_file, args.label_map, args.batch_size)
+  for batch in read_tf_records(args.eval_file, args.label_map, args.batch_size):
     pass
