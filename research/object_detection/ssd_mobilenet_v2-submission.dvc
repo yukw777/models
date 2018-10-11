@@ -1,5 +1,5 @@
 cmd: python pneumonia/model_infer.py pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/frozen-submission/frozen_inference_graph.pb
-  pneumonia/data/pneumonia_label_map.pbtxt pneumonia/data/stage_1_test_images pneumonia/models/ssd_mobilenet_v2/submission.csv
+  pneumonia/data/pneumonia_label_map.pbtxt pneumonia/data/stage_1_test_images pneumonia/models/ssd_mobilenet_v2/ssd_mobilenet_v2-submission.csv
   pneumonia/models/ssd_mobilenet_v2/tested_images
 deps:
 - md5: dd4ccffa0c0480ae36983b95005b2645
@@ -12,7 +12,7 @@ md5: 07a1a0239a3c74c916620af2e690b7bb
 outs:
 - cache: true
   md5: bfa280f3d013ffc0c2f346cfc20a0345
-  path: pneumonia/models/ssd_mobilenet_v2/submission.csv
+  path: pneumonia/models/ssd_mobilenet_v2/ssd_mobilenet_v2-submission.csv
 - cache: true
   md5: f500d63d19f39a4b3656313965862e5a.dir
   path: pneumonia/models/ssd_mobilenet_v2/tested_images
