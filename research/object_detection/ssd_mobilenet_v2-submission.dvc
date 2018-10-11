@@ -8,7 +8,7 @@ deps:
   path: pneumonia/data/pneumonia_label_map.pbtxt
 - md5: 358375db3f3d441f321efe172de12f49.dir
   path: pneumonia/data/stage_1_test_images
-md5: 07a1a0239a3c74c916620af2e690b7bb
+md5: a727d48570437be03ec142fb8bcfa15c
 outs:
 - cache: true
   md5: bfa280f3d013ffc0c2f346cfc20a0345
