@@ -16,7 +16,7 @@ r"""Infers detections on a TFRecord of TFExamples given an inference graph.
 
 Example usage:
   ./infer_detections \
-    --input_tfrecord_paths=/path/to/input/tfrecord1,/path/to/input/tfrecord2 \
+    --input_tfrecord_pattern=/path/to/input/tfrecord1* \
     --output_images_dir=/path/to/output/detections/images \
     --inference_graph=/path/to/frozen_weights_inference_graph.pb
 
@@ -28,6 +28,7 @@ types, shapes, and semantics, as the input and output nodes of graphs produced
 by export_inference_graph.py, when run with --input_type=image_tensor.
 """
 
+import glob
 import os
 import itertools
 import tensorflow as tf
@@ -39,8 +40,8 @@ from object_detection.utils import visualization_utils as vis_util
 from PIL import Image
 from io import BytesIO
 
-tf.flags.DEFINE_string('input_tfrecord_paths', None,
-                       'A comma separated list of paths to input TFRecords.')
+tf.flags.DEFINE_string('input_tfrecord_pattern', None,
+                       'glob pattern for input tfrecords')
 tf.flags.DEFINE_string('output_images_dir', None,
                        'Path to the output images.')
 tf.flags.DEFINE_string('inference_graph', None,
@@ -95,7 +96,7 @@ def draw_bounding_boxes_from_example(image_np, tf_example, category_index):
 def main(_):
   tf.logging.set_verbosity(tf.logging.INFO)
 
-  required_flags = ['input_tfrecord_paths', 'output_images_dir',
+  required_flags = ['input_tfrecord_pattern', 'output_images_dir',
                     'inference_graph', 'label_map']
   for flag_name in required_flags:
     if not getattr(FLAGS, flag_name):
@@ -109,8 +110,7 @@ def main(_):
     os.mkdir(FLAGS.output_images_dir)
 
   with tf.Session() as sess:
-    input_tfrecord_paths = [
-        v for v in FLAGS.input_tfrecord_paths.split(',') if v]
+    input_tfrecord_paths = glob.glob(FLAGS.input_tfrecord_pattern)
     tf.logging.info('Reading input from %d files', len(input_tfrecord_paths))
     serialized_example_tensor, image_tensor = detection_inference.build_input(
         input_tfrecord_paths)
