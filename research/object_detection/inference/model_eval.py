@@ -28,6 +28,7 @@ types, shapes, and semantics, as the input and output nodes of graphs produced
 by export_inference_graph.py, when run with --input_type=image_tensor.
 """
 
+import os
 import itertools
 import tensorflow as tf
 import numpy as np
@@ -97,6 +98,10 @@ def main(_):
     if not getattr(FLAGS, flag_name):
       raise ValueError('Flag --{} is required'.format(flag_name))
 
+  # create the outputdir if it doesn't exist already
+  if not os.path.exists(FLAGS.output_image_dir):
+    os.mkdir(FLAGS.output_image_dir)
+
   with tf.Session() as sess:
     input_tfrecord_paths = [
         v for v in FLAGS.input_tfrecord_paths.split(',') if v]
@@ -122,7 +127,8 @@ def main(_):
         image_np = get_image_array_from_example(tf_example)
         draw_bounding_boxes_from_example(image_np, tf_example)
         im = Image.fromarray(image_np)
-        im.save("test.jpg")
+        pid = tf_example.features.feature[standard_fields.TfExampleFields.source_id].bytes_list.value[0].decode()
+        im.save(os.path.join(FLAGS.output_images_dir, pid + '.jpg'))
     except tf.errors.OutOfRangeError:
       tf.logging.info('Finished processing records')
 
