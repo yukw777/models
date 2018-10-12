@@ -34,6 +34,7 @@ import tensorflow as tf
 import numpy as np
 from object_detection.inference import detection_inference
 from object_detection.core import standard_fields
+from object_detection.utils import label_map_util
 from object_detection.utils import visualization_utils as vis_util
 from PIL import Image
 from io import BytesIO
@@ -44,6 +45,8 @@ tf.flags.DEFINE_string('output_images_dir', None,
                        'Path to the output images.')
 tf.flags.DEFINE_string('inference_graph', None,
                        'Path to the inference graph with embedded weights.')
+tf.flags.DEFINE_string('label_map', None,
+                       'Path to the label map file.')
 FLAGS = tf.flags.FLAGS
 
 
@@ -54,7 +57,7 @@ def get_image_array_from_example(tf_example):
   return np.stack([image_np] * 3, axis=2)
 
 
-def draw_bounding_boxes_from_example(image_np, tf_example):
+def draw_bounding_boxes_from_example(image_np, tf_example, category_index):
   # detected bounding boxes
   d_xmin = tf_example.features.feature[standard_fields.TfExampleFields.detection_bbox_xmin].float_list.value
   d_xmax = tf_example.features.feature[standard_fields.TfExampleFields.detection_bbox_xmax].float_list.value
@@ -67,7 +70,7 @@ def draw_bounding_boxes_from_example(image_np, tf_example):
     np.stack([d_ymin, d_xmin, d_ymax, d_xmax], axis=1),
     d_classes,
     d_scores,
-    {1: {'id': 1, 'name': 'pneumonia'}},
+    category_index,
     use_normalized_coordinates=True,
     max_boxes_to_draw=3,
     min_score_thresh=0.0001
@@ -84,7 +87,7 @@ def draw_bounding_boxes_from_example(image_np, tf_example):
     np.stack([g_ymin, g_xmin, g_ymax, g_xmax], axis=1),
     g_classes,
     None,
-    {1: {'id': 1, 'name': 'pneumonia'}},
+    category_index,
     use_normalized_coordinates=True,
   )
 
@@ -93,10 +96,13 @@ def main(_):
   tf.logging.set_verbosity(tf.logging.INFO)
 
   required_flags = ['input_tfrecord_paths', 'output_images_dir',
-                    'inference_graph']
+                    'inference_graph', 'label_map']
   for flag_name in required_flags:
     if not getattr(FLAGS, flag_name):
       raise ValueError('Flag --{} is required'.format(flag_name))
+
+  # load the categories
+  category_index = label_map_util.create_category_index_from_labelmap(FLAGS.label_map, use_display_name=True)
 
   # create the outputdir if it doesn't exist already
   if not os.path.exists(FLAGS.output_images_dir):
@@ -125,7 +131,7 @@ def main(_):
             detected_scores_tensor, detected_labels_tensor,
             False)
         image_np = get_image_array_from_example(tf_example)
-        draw_bounding_boxes_from_example(image_np, tf_example)
+        draw_bounding_boxes_from_example(image_np, tf_example, category_index)
         im = Image.fromarray(image_np)
         pid = tf_example.features.feature[standard_fields.TfExampleFields.source_id].bytes_list.value[0].decode()
         im.save(os.path.join(FLAGS.output_images_dir, pid + '.jpg'))
