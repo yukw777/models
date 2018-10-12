@@ -30,7 +30,12 @@ by export_inference_graph.py, when run with --input_type=image_tensor.
 
 import itertools
 import tensorflow as tf
+import numpy as np
 from object_detection.inference import detection_inference
+from object_detection.core import standard_fields
+from object_detection.utils import visualization_utils as vis_util
+from PIL import Image
+from io import BytesIO
 
 tf.flags.DEFINE_string('input_tfrecord_paths', None,
                        'A comma separated list of paths to input TFRecords.')
@@ -68,12 +73,28 @@ def main(_):
     try:
       for counter in itertools.count():
         tf.logging.log_every_n(tf.logging.INFO, 'Processed %d images...', 10, counter)
+        tf_example = tf.train.Example()
         (serialized_example, detected_boxes, detected_scores,
-        detected_classes) = sess.run([
-            serialized_example_tensor, detected_boxes_tensor, detected_scores_tensor,
-            detected_labels_tensor
-        ])
-        print(detected_scores)
+          detected_classes) = sess.run([
+              serialized_example_tensor, detected_boxes_tensor, detected_scores_tensor,
+              detected_labels_tensor
+          ])
+        tf_example.ParseFromString(serialized_example)
+        encoded_jpg = tf_example.features.feature[standard_fields.TfExampleFields.image_encoded]
+        image = Image.open(BytesIO(encoded_jpg))
+        image_np = np.array(image)
+        vis_util.visualize_boxes_and_labels_on_image_array(
+            image_np,
+            detected_boxes,
+            detected_classes,
+            detected_scores,
+            {1: {'id': 1, 'name': 'pneumonia'}},
+            use_normalized_coordinates=True,
+            max_boxes_to_draw=3,
+            min_score_thresh=0.0001
+        )
+        im = Image.fromarray(image_np)
+        im.save("test.jpg")
     except tf.errors.OutOfRangeError:
       tf.logging.info('Finished processing records')
 
