@@ -99,8 +99,8 @@ def main(_):
       raise ValueError('Flag --{} is required'.format(flag_name))
 
   # create the outputdir if it doesn't exist already
-  if not os.path.exists(FLAGS.output_image_dir):
-    os.mkdir(FLAGS.output_image_dir)
+  if not os.path.exists(FLAGS.output_images_dir):
+    os.mkdir(FLAGS.output_images_dir)
 
   with tf.Session() as sess:
     input_tfrecord_paths = [
