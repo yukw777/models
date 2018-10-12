@@ -39,7 +39,7 @@ from io import BytesIO
 
 tf.flags.DEFINE_string('input_tfrecord_paths', None,
                        'A comma separated list of paths to input TFRecords.')
-tf.flags.DEFINE_string('output_image_dir', None,
+tf.flags.DEFINE_string('output_images_dir', None,
                        'Path to the output images.')
 tf.flags.DEFINE_string('inference_graph', None,
                        'Path to the inference graph with embedded weights.')
@@ -91,7 +91,7 @@ def draw_bounding_boxes_from_example(image_np, tf_example):
 def main(_):
   tf.logging.set_verbosity(tf.logging.INFO)
 
-  required_flags = ['input_tfrecord_paths', 'output_image_dir',
+  required_flags = ['input_tfrecord_paths', 'output_images_dir',
                     'inference_graph']
   for flag_name in required_flags:
     if not getattr(FLAGS, flag_name):
@@ -109,7 +109,7 @@ def main(_):
          image_tensor, FLAGS.inference_graph)
 
     tf.logging.info('Running inference and writing output to {}'.format(
-        FLAGS.output_tfrecord_path))
+        FLAGS.output_images_dir))
     sess.run(tf.local_variables_initializer())
     tf.train.start_queue_runners()
     try:
