@@ -68,7 +68,12 @@ def main(_):
     try:
       for counter in itertools.count():
         tf.logging.log_every_n(tf.logging.INFO, 'Processed %d images...', 10, counter)
-        tf.logging.info(detected_scores_tensor)
+        (serialized_example, detected_boxes, detected_scores,
+        detected_classes) = sess.run([
+            serialized_example_tensor, detected_boxes_tensor, detected_scores_tensor,
+            detected_labels_tensor
+        ])
+        print(detected_scores)
     except tf.errors.OutOfRangeError:
       tf.logging.info('Finished processing records')
 
