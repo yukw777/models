@@ -80,9 +80,10 @@ def main(_):
               detected_labels_tensor
           ])
         tf_example.ParseFromString(serialized_example)
-        encoded_jpg = tf_example.features.feature[standard_fields.TfExampleFields.image_encoded]
+        encoded_jpg = tf_example.features.feature[standard_fields.TfExampleFields.image_encoded].bytes_list.value[0]
         image = Image.open(BytesIO(encoded_jpg))
         image_np = np.array(image)
+        image_np = np.stack([image_np] * 3, axis=2)
         vis_util.visualize_boxes_and_labels_on_image_array(
             image_np,
             detected_boxes,
