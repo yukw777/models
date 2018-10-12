@@ -118,7 +118,7 @@ def main(_):
         tf_example = detection_inference.infer_detections_and_add_to_example(
             serialized_example_tensor, detected_boxes_tensor,
             detected_scores_tensor, detected_labels_tensor,
-            FLAGS.discard_image_pixels)
+            False)
         image_np = get_image_array_from_example(tf_example)
         draw_bounding_boxes_from_example(image_np, tf_example)
         im = Image.fromarray(image_np)
