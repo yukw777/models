@@ -20,9 +20,12 @@ def read_tf_records(eval_file, label_map_path, batch_size):
 
   dataset = build(input_reader_config, batch_size=batch_size)
   iterator = dataset.make_initializable_iterator()
-  while True:
+  next_batch = iterator.get_next()
+  with tf.Session() as sess:
+    sess.run(iterator.initializer)
     try:
-      yield iterator.get_next()
+      while True:
+        yield sess.run(next_batch)
     except tf.errors.OutOfRangeError:
       return
 
@@ -45,4 +48,4 @@ if __name__ == '__main__':
   frozen_graph = load_tf_graph(args.frozen_graph)
 
   for batch in read_tf_records(args.eval_file, args.label_map, args.batch_size):
-    pass
+    import pdb; pdb.set_trace()
