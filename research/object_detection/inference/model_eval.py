@@ -39,17 +39,59 @@ from io import BytesIO
 
 tf.flags.DEFINE_string('input_tfrecord_paths', None,
                        'A comma separated list of paths to input TFRecords.')
-tf.flags.DEFINE_string('output_tfrecord_path', None,
-                       'Path to the output TFRecord.')
+tf.flags.DEFINE_string('output_image_dir', None,
+                       'Path to the output images.')
 tf.flags.DEFINE_string('inference_graph', None,
                        'Path to the inference graph with embedded weights.')
 FLAGS = tf.flags.FLAGS
 
 
+def get_image_array_from_example(tf_example):
+  encoded_jpg = tf_example.features.feature[standard_fields.TfExampleFields.image_encoded].bytes_list.value[0]
+  image = Image.open(BytesIO(encoded_jpg))
+  image_np = np.array(image)
+  return np.stack([image_np] * 3, axis=2)
+
+
+def draw_bounding_boxes_from_example(image_np, tf_example):
+  # detected bounding boxes
+  d_xmin = tf_example.features.feature[standard_fields.TfExampleFields.detection_bbox_xmin].float_list.value
+  d_xmax = tf_example.features.feature[standard_fields.TfExampleFields.detection_bbox_xmax].float_list.value
+  d_ymin = tf_example.features.feature[standard_fields.TfExampleFields.detection_bbox_ymin].float_list.value
+  d_ymax = tf_example.features.feature[standard_fields.TfExampleFields.detection_bbox_ymax].float_list.value
+  d_classes = tf_example.features.feature[standard_fields.TfExampleFields.detection_class_label].int64_list.value
+  d_scores = tf_example.features.feature[standard_fields.TfExampleFields.detection_score].float_list.value
+  vis_util.visualize_boxes_and_labels_on_image_array(
+    image_np,
+    np.stack([d_ymin, d_xmin, d_ymax, d_xmax], axis=1),
+    d_classes,
+    d_scores,
+    {1: {'id': 1, 'name': 'pneumonia'}},
+    use_normalized_coordinates=True,
+    max_boxes_to_draw=3,
+    min_score_thresh=0.0001
+  )
+
+  # ground truth bounding boxes
+  g_xmin = tf_example.features.feature[standard_fields.TfExampleFields.object_bbox_xmin].float_list.value
+  g_xmax = tf_example.features.feature[standard_fields.TfExampleFields.object_bbox_xmax].float_list.value
+  g_ymin = tf_example.features.feature[standard_fields.TfExampleFields.object_bbox_ymin].float_list.value
+  g_ymax = tf_example.features.feature[standard_fields.TfExampleFields.object_bbox_ymax].float_list.value
+  g_classes = tf_example.features.feature[standard_fields.TfExampleFields.object_class_label].int64_list.value
+  vis_util.visualize_boxes_and_labels_on_image_array(
+    image_np,
+    np.stack([g_ymin, g_xmin, g_ymax, g_xmax], axis=1),
+    g_classes,
+    None,
+    {1: {'id': 1, 'name': 'pneumonia'}},
+    use_normalized_coordinates=True,
+  )
+
+
 def main(_):
   tf.logging.set_verbosity(tf.logging.INFO)
 
-  required_flags = ['input_tfrecord_paths', 'output_tfrecord_path',
+  required_flags = ['input_tfrecord_paths', 'output_image_dir',
                     'inference_graph']
   for flag_name in required_flags:
     if not getattr(FLAGS, flag_name):
@@ -73,27 +115,12 @@ def main(_):
     try:
       for counter in itertools.count():
         tf.logging.log_every_n(tf.logging.INFO, 'Processed %d images...', 10, counter)
-        tf_example = tf.train.Example()
-        (serialized_example, detected_boxes, detected_scores,
-          detected_classes) = sess.run([
-              serialized_example_tensor, detected_boxes_tensor, detected_scores_tensor,
-              detected_labels_tensor
-          ])
-        tf_example.ParseFromString(serialized_example)
-        encoded_jpg = tf_example.features.feature[standard_fields.TfExampleFields.image_encoded].bytes_list.value[0]
-        image = Image.open(BytesIO(encoded_jpg))
-        image_np = np.array(image)
-        image_np = np.stack([image_np] * 3, axis=2)
-        vis_util.visualize_boxes_and_labels_on_image_array(
-            image_np,
-            detected_boxes,
-            detected_classes,
-            detected_scores,
-            {1: {'id': 1, 'name': 'pneumonia'}},
-            use_normalized_coordinates=True,
-            max_boxes_to_draw=3,
-            min_score_thresh=0.0001
-        )
+        tf_example = detection_inference.infer_detections_and_add_to_example(
+            serialized_example_tensor, detected_boxes_tensor,
+            detected_scores_tensor, detected_labels_tensor,
+            FLAGS.discard_image_pixels)
+        image_np = get_image_array_from_example(tf_example)
+        draw_bounding_boxes_from_example(image_np, tf_example)
         im = Image.fromarray(image_np)
         im.save("test.jpg")
     except tf.errors.OutOfRangeError:
