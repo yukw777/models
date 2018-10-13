@@ -27,6 +27,11 @@ RUN apt-get update && apt-get install -y protobuf-compiler python-pil python-lxm
     pip install matplotlib
 
 
+# Install wget (to make life easier below) and editors (to allow people to edit
+# the files inside the container)
+RUN apt-get install -y wget vim emacs nano
+
+
 # Install additional dependencies
 RUN pip install pandas && \
     pip install pydicom && \
@@ -63,9 +68,5 @@ RUN cd /yukw777-tf-models/research && \
 # Set the PYTHONPATH to finish installing the API
 ENV PYTHONPATH $PYTHONPATH:/yukw777-tf-models/research:/yukw777-tf-models/research/slim
 
-
-# Install wget (to make life easier below) and editors (to allow people to edit
-# the files inside the container)
-RUN apt-get install -y wget vim emacs nano
 
 WORKDIR /yukw777-tf-models
