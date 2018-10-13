@@ -33,14 +33,6 @@ RUN pip install pandas && \
     pip install tqdm
 
 
-# Install pycocoapi
-RUN git clone --depth 1 https://github.com/cocodataset/cocoapi.git && \
-    cd cocoapi/PythonAPI && \
-    make -j8 && \
-    cp -r pycocotools /yukw777-tf-models/research && \
-    cd ../../ && \
-    rm -rf cocoapi
-
 # Get protoc 3.0.0, rather than the old version already in the container
 RUN curl -OL "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip" && \
     unzip protoc-3.0.0-linux-x86_64.zip -d proto3 && \
@@ -52,6 +44,15 @@ RUN curl -OL "https://github.com/google/protobuf/releases/download/v3.0.0/protoc
 # Get the forked tensorflow models research directory, and move it into tensorflow
 # source folder to match recommendation of installation
 RUN git clone --depth 1 https://github.com/yukw777/models.git /yukw777-tf-models
+
+
+# Install pycocoapi
+RUN git clone --depth 1 https://github.com/cocodataset/cocoapi.git && \
+    cd cocoapi/PythonAPI && \
+    make -j8 && \
+    cp -r pycocotools /yukw777-tf-models/research && \
+    cd ../../ && \
+    rm -rf cocoapi
 
 
 # Run protoc on the object detection repo
