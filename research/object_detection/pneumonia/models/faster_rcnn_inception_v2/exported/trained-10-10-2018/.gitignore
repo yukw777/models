@@ -3,3 +3,4 @@ model.ckpt-77287.index
 model.ckpt-77287.meta
 pipeline.config
 frozen
+frozen-submission
