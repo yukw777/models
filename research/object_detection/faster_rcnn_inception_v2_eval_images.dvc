@@ -1,5 +1,5 @@
 cmd: python inference/model_eval.py --inference_graph pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/frozen/frozen_inference_graph.pb
-  --input_tfrecord_pattern "pneumonia/data/records/pneumonia_eval.record-?????-of-00010"
+  --input_tfrecord_pattern pneumonia/data/records/pneumonia_eval.record-?????-of-00010
   --label_map pneumonia/data/pneumonia_label_map.pbtxt --output_images_dir pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/eval_images
 deps:
 - md5: 3d764965287fe4672316df51c76e56f2
@@ -8,4 +8,8 @@ deps:
   path: pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/frozen
 - md5: 6b2040f153af78a1092db56a59c56096.dir
   path: pneumonia/data/records
-md5: 2e135623190d456e7cc7885503180069
+md5: ac26a931dd8488068e144525f6a29d93
+outs:
+- cache: true
+  md5: bea617f16fc2ac8f01f6171bbfcb5d37.dir
+  path: pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/eval_images
