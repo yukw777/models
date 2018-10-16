@@ -1,0 +1,20 @@
+cmd: python inference/model_eval.py --inference_graph pneumonia/models/faster_rcnn_resnet50/exported/trained-10-14-2018/frozen/frozen_inference_graph.pb
+  --input_tfrecord_pattern pneumonia/data/records/pneumonia_eval.record-00000-of-00010
+  pneumonia/data/records/pneumonia_eval.record-00001-of-00010 pneumonia/data/records/pneumonia_eval.record-00002-of-00010
+  pneumonia/data/records/pneumonia_eval.record-00003-of-00010 pneumonia/data/records/pneumonia_eval.record-00004-of-00010
+  pneumonia/data/records/pneumonia_eval.record-00005-of-00010 pneumonia/data/records/pneumonia_eval.record-00006-of-00010
+  pneumonia/data/records/pneumonia_eval.record-00007-of-00010 pneumonia/data/records/pneumonia_eval.record-00008-of-00010
+  pneumonia/data/records/pneumonia_eval.record-00009-of-00010 --label_map pneumonia/data/pneumonia_label_map.pbtxt
+  --output_images_dir pneumonia/models/faster_rcnn_resnet50/exported/trained-10-14-2018/eval_images
+deps:
+- md5: 3d764965287fe4672316df51c76e56f2
+  path: pneumonia/data/pneumonia_label_map.pbtxt
+- md5: f9a43f11b1b5fa2c0f2364736cc69573.dir
+  path: pneumonia/models/faster_rcnn_resnet50/exported/trained-10-14-2018/frozen
+- md5: 6b2040f153af78a1092db56a59c56096.dir
+  path: pneumonia/data/records
+md5: 1415de8d0c07b929c6a0da6a8e8be123
+outs:
+- cache: true
+  md5: bb320a65a1ee48362a4c869bebdd7f0d.dir
+  path: pneumonia/models/faster_rcnn_resnet50/exported/trained-10-14-2018/eval_images
