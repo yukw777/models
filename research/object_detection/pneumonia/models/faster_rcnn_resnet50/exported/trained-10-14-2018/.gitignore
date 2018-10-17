@@ -4,3 +4,4 @@ model.ckpt-710.meta
 pipeline.config
 frozen
 eval_images
+frozen-submission
