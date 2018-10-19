@@ -4,3 +4,4 @@ model.ckpt-8479.index
 model.ckpt-8479.meta
 frozen
 eval_images
+frozen-submission
