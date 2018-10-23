@@ -2,3 +2,4 @@ model.ckpt-22644.data-00000-of-00001
 model.ckpt-22644.index
 model.ckpt-22644.meta
 pipeline.config
+frozen
