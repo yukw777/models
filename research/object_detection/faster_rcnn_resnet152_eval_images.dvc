@@ -1,0 +1,15 @@
+cmd: python inference/model_eval.py --inference_graph pneumonia/models/faster_rcnn_resnet152/exported/trained-10-22-2018_4/frozen/frozen_inference_graph.pb
+  --input_tfrecord_pattern pneumonia/data/records/pneumonia_eval.record-00005-of-00010
+  --label_map pneumonia/data/pneumonia_label_map.pbtxt --output_images_dir pneumonia/models/faster_rcnn_resnet152/exported/trained-10-22-2018_4/eval_images
+deps:
+- md5: 3d764965287fe4672316df51c76e56f2
+  path: pneumonia/data/pneumonia_label_map.pbtxt
+- md5: bc94fbf8ab609927df876e48165ef426.dir
+  path: pneumonia/models/faster_rcnn_resnet152/exported/trained-10-22-2018_4/frozen
+- md5: 6b2040f153af78a1092db56a59c56096.dir
+  path: pneumonia/data/records
+md5: d944a796097fbfaa35861abd13ee3c2b
+outs:
+- cache: true
+  md5: be8e19b6540f4282f910d6df053a5773.dir
+  path: pneumonia/models/faster_rcnn_resnet152/exported/trained-10-22-2018_4/eval_images

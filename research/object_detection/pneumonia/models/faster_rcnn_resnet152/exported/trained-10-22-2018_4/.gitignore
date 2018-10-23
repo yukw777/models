@@ -3,3 +3,4 @@ model.ckpt-22644.index
 model.ckpt-22644.meta
 pipeline.config
 frozen
+eval_images
