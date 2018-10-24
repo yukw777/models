@@ -1,0 +1,18 @@
+cmd: python object_detection/export_inference_graph.py --input_type image_tensor --pipeline_config_path
+  object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/pipeline.config
+  --trained_checkpoint_prefix object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/model.ckpt-7534
+  --output_directory object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/frozen2
+deps:
+- md5: 75bc3a755b0b655a653781e6866dd11b
+  path: object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/pipeline.config
+- md5: 313fdf63d181ea1596fe9ecb651edfd2
+  path: object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/model.ckpt-7534.data-00000-of-00001
+- md5: 178e91359561b84789113efdac0f2019
+  path: object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/model.ckpt-7534.index
+- md5: 17196d2c6d00f1b571f78ad9e2fadd9a
+  path: object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/model.ckpt-7534.meta
+md5: 8a9c0297d551f436a2721ce5374a6e52
+outs:
+- cache: true
+  md5: 34a8abad2c50d19685a0a6aee3f4ab63.dir
+  path: object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/frozen2
