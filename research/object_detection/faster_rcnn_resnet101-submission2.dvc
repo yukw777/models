@@ -1,0 +1,18 @@
+cmd: python pneumonia/model_infer.py pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/frozen-submission/frozen_inference_graph.pb
+  pneumonia/data/pneumonia_label_map.pbtxt pneumonia/data/stage_1_test_images pneumonia/models/faster_rcnn_resnet101/faster_rcnn_resnet101-submission2.csv
+  pneumonia/models/faster_rcnn_resnet101/tested_images2
+deps:
+- md5: 5a9437e76892a23cc3491aa1f0e2c537.dir
+  path: pneumonia/models/faster_rcnn_resnet101/exported/trained-10-24-2018_2/frozen-submission
+- md5: 3d764965287fe4672316df51c76e56f2
+  path: pneumonia/data/pneumonia_label_map.pbtxt
+- md5: 358375db3f3d441f321efe172de12f49.dir
+  path: pneumonia/data/stage_1_test_images
+md5: 11df77192f4c328e132e5d9bbdba9759
+outs:
+- cache: true
+  md5: 3b2a2f640d4cf1ee0866fc2080016784
+  path: pneumonia/models/faster_rcnn_resnet101/faster_rcnn_resnet101-submission2.csv
+- cache: true
+  md5: 869b6fbd81239fc1c660d0d814c41e3d.dir
+  path: pneumonia/models/faster_rcnn_resnet101/tested_images2

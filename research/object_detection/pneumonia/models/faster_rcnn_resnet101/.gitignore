@@ -3,3 +3,5 @@ model.ckpt.index
 model.ckpt.meta
 faster_rcnn_resnet101-submission.csv
 tested_images
+faster_rcnn_resnet101-submission2.csv
+tested_images2
