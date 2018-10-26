@@ -1,0 +1,5 @@
+md5: 49a47165de26d58d85dd4f47403e6f1a
+outs:
+- cache: true
+  md5: f9470cd8db44dad2bcb0c670af241348
+  path: pipeline.config

@@ -1,0 +1,5 @@
+md5: 7136e161746731305f2cde0116aa8363
+outs:
+- cache: true
+  md5: e7efa1afa9663fd0228e6e5c3eb88e70
+  path: model.ckpt-19817.index
