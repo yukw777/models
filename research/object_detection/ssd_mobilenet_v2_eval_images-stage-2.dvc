@@ -1,0 +1,15 @@
+cmd: python inference/model_eval.py --inference_graph pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/frozen/frozen_inference_graph.pb
+  --input_tfrecord_pattern pneumonia/data/records/pneumonia_eval.record-00005-of-00010
+  --label_map pneumonia/data/pneumonia_label_map.pbtxt --output_images_dir pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/eval_images
+deps:
+- md5: 3d764965287fe4672316df51c76e56f2
+  path: pneumonia/data/pneumonia_label_map.pbtxt
+- md5: 463ea5361633bca2380227b8668d27ce.dir
+  path: pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/frozen
+- md5: f9b2930ff772df1d6360ebc0404fe43b.dir
+  path: pneumonia/data/records
+md5: 45994c6769f3adf3efb4b55dda6091f7
+outs:
+- cache: true
+  md5: 5a30d8b7174536b51ac971e96d3f6c40.dir
+  path: pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/eval_images
