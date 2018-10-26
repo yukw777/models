@@ -6,7 +6,7 @@ matplotlib==3.0.0
 pandas==0.23.4
 Pillow==5.2.0
 pylint==2.1.1
-tensorflow-gpu==1.11.0
+tensorflow-gpu==1.10.0
 pydicom==1.1.0
 pycocotools==2.0.0
 tqdm==4.26.0
