@@ -1,0 +1,17 @@
+cmd: python object_detection/export_inference_graph.py --pipeline_config_path object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/pipeline.config
+  --trained_checkpoint_prefix object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/model.ckpt-19817
+  --output_directory object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/frozen
+deps:
+- md5: f9470cd8db44dad2bcb0c670af241348
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/pipeline.config
+- md5: 7096d921706d65220df23d29972dc133
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/model.ckpt-19817.data-00000-of-00001
+- md5: e7efa1afa9663fd0228e6e5c3eb88e70
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/model.ckpt-19817.index
+- md5: 38e1d78afeafb1d1ce5ab85bcd465181
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/model.ckpt-19817.meta
+md5: 238b6c08aa1d680bb4a6580e83a62811
+outs:
+- cache: true
+  md5: 463ea5361633bca2380227b8668d27ce.dir
+  path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-25-2018_2/frozen
