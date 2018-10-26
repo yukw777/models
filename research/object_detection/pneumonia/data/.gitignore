@@ -2,3 +2,7 @@ stage_1_train_images
 stage_1_train_labels.csv
 records
 stage_1_test_images
+stage_2_test_images
+stage_2_train_images
+stage_2_train_labels.csv
+*.zip

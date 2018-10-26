@@ -1,0 +1,5 @@
+md5: 7f7560607d7b428fdb05422a24319924
+outs:
+- cache: true
+  md5: 3fd56c2857f39d9f9df084ddadd7c8de.dir
+  path: stage_2_train_images

@@ -1,5 +1,5 @@
 cmd: python pneumonia/model_infer.py pneumonia/models/faster_rcnn_resnet101/exported/trained-10-17-2018_2/frozen-submission/frozen_inference_graph.pb
-  pneumonia/data/pneumonia_label_map.pbtxt pneumonia/data/stage_1_test_images pneumonia/models/faster_rcnn_resnet101/faster_rcnn_resnet101-submission.csv
+  pneumonia/data/pneumonia_label_map.pbtxt pneumonia/data/stage_2_test_images pneumonia/models/faster_rcnn_resnet101/faster_rcnn_resnet101-submission.csv
   pneumonia/models/faster_rcnn_resnet101/tested_images
 deps:
 - md5: 987704896b0d4d898672676d1353e3e3.dir
