@@ -2,9 +2,9 @@ cmd: "python object_detection/export_inference_graph.py --pipeline_config_path o
   \ --trained_checkpoint_prefix object_detection/pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/model.ckpt-77287\
   \ --output_directory object_detection/pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/frozen-submission\
   \ --config_override \"\nmodel {\n  faster_rcnn {\n    second_stage_post_processing\
-  \ {\n      batch_non_max_suppression {\n        score_threshold: 0.0001\n      \
-  \  iou_threshold: 0.1\n        max_detections_per_class: 10\n        max_total_detections:\
-  \ 10\n      }\n    }\n  }\n}\""
+  \ {\n      batch_non_max_suppression {\n        score_threshold: 0.3\n        iou_threshold:\
+  \ 0.1\n        max_detections_per_class: 10\n        max_total_detections: 10\n\
+  \      }\n    }\n  }\n}\""
 deps:
 - md5: 832d7516bcb539dfe37c904dee607bf6
   path: object_detection/pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/pipeline.config
@@ -14,8 +14,8 @@ deps:
   path: object_detection/pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/model.ckpt-77287.index
 - md5: c853fa8c897cba3ac808579ecb235fd6
   path: object_detection/pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/model.ckpt-77287.meta
-md5: bcf6cb34a1ee47723414dbea193af879
+md5: 7a241ce2220fdacee09b707b9433a649
 outs:
 - cache: true
-  md5: 5c935727f50a83d116f3ec26a1070c7a.dir
+  md5: 381b1e3f88c4c6cf2ec34784abd434c0.dir
   path: object_detection/pneumonia/models/faster_rcnn_inception_v2/exported/trained-10-10-2018/frozen-submission
