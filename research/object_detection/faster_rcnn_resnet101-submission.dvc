@@ -1,18 +1,18 @@
 cmd: python pneumonia/model_infer.py pneumonia/models/faster_rcnn_resnet101/exported/trained-10-17-2018_2/frozen-submission/frozen_inference_graph.pb
-  pneumonia/data/pneumonia_label_map.pbtxt pneumonia/data/stage_1_test_images pneumonia/models/faster_rcnn_resnet101/faster_rcnn_resnet101-submission.csv
+  pneumonia/data/pneumonia_label_map.pbtxt pneumonia/data/stage_2_test_images pneumonia/models/faster_rcnn_resnet101/faster_rcnn_resnet101-submission.csv
   pneumonia/models/faster_rcnn_resnet101/tested_images
 deps:
-- md5: af11eea4502e598a62445ab94fab0b03.dir
+- md5: 93b9ca60ac1a9a9927f804f59e839d84.dir
   path: pneumonia/models/faster_rcnn_resnet101/exported/trained-10-17-2018_2/frozen-submission
 - md5: 3d764965287fe4672316df51c76e56f2
   path: pneumonia/data/pneumonia_label_map.pbtxt
 - md5: 358375db3f3d441f321efe172de12f49.dir
   path: pneumonia/data/stage_1_test_images
-md5: c778a2e231a91a378ab7f5e6afcef71c
+md5: de59e0dcdc87d648b6c5e9719542211f
 outs:
 - cache: true
-  md5: 679f1d0fd9909fe8055e93ec8ec62797
+  md5: 640d96b021835b4048bc46da2e6ba905
   path: pneumonia/models/faster_rcnn_resnet101/faster_rcnn_resnet101-submission.csv
 - cache: true
-  md5: b3097811bdf68982d7fe41e13f65683f.dir
+  md5: 2349dc56fc29b182074a12df9a6ef155.dir
   path: pneumonia/models/faster_rcnn_resnet101/tested_images

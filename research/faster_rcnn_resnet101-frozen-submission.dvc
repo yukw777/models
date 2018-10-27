@@ -14,8 +14,8 @@ deps:
   path: object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-17-2018_2/model.ckpt-8479.index
 - md5: 4c281f31e0ce9b2e5025b0c119122d93
   path: object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-17-2018_2/model.ckpt-8479.meta
-md5: 253f3c905a3d11249e70c56524d26945
+md5: 9be551d89c53031c905174b31dd76f15
 outs:
 - cache: true
-  md5: af11eea4502e598a62445ab94fab0b03.dir
+  md5: 93b9ca60ac1a9a9927f804f59e839d84.dir
   path: object_detection/pneumonia/models/faster_rcnn_resnet101/exported/trained-10-17-2018_2/frozen-submission
