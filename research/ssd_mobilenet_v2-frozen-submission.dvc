@@ -13,8 +13,8 @@ deps:
   path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/model.ckpt-47561.index
 - md5: 1156eab330c9b3d2408c11c26c099592
   path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/model.ckpt-47561.meta
-md5: 89d38d6327e8cb6b5bbdb956688239df
+md5: d100ef46e7943b1abcba6aa1b6e73ec4
 outs:
 - cache: true
-  md5: 88fd54b7d7dca9615e2917ac290ad77b.dir
+  md5: 21db5fdff1a3f816e0131595baff8bd0.dir
   path: object_detection/pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/frozen-submission
