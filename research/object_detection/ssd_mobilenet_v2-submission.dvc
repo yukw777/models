@@ -1,18 +1,18 @@
 cmd: python pneumonia/model_infer.py pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/frozen-submission/frozen_inference_graph.pb
-  pneumonia/data/pneumonia_label_map.pbtxt pneumonia/data/stage_1_test_images pneumonia/models/ssd_mobilenet_v2/ssd_mobilenet_v2-submission.csv
+  pneumonia/data/pneumonia_label_map.pbtxt pneumonia/data/stage_2_test_images pneumonia/models/ssd_mobilenet_v2/ssd_mobilenet_v2-submission.csv
   pneumonia/models/ssd_mobilenet_v2/tested_images
 deps:
-- md5: 8a2ad4b385ae9edc7d47bf86e2782982
+- md5: 0937c1149c23c3bec038d33db2879e9f
   path: pneumonia/models/ssd_mobilenet_v2/exported/trained-10-07-2018/frozen-submission/frozen_inference_graph.pb
 - md5: 3d764965287fe4672316df51c76e56f2
   path: pneumonia/data/pneumonia_label_map.pbtxt
 - md5: 358375db3f3d441f321efe172de12f49.dir
   path: pneumonia/data/stage_1_test_images
-md5: bd08999146bb36a92d6eb7e126d72d23
+md5: 27cd338eb9e8270722175d5a7ba323d4
 outs:
 - cache: true
-  md5: acaf82f0970fecce4b9423b978a477e2
+  md5: 628f54e495081e2a86fc5b5583122323
   path: pneumonia/models/ssd_mobilenet_v2/ssd_mobilenet_v2-submission.csv
 - cache: true
-  md5: 504a447a2a50c22f31cf00df10bbb355.dir
+  md5: dd44fd6e34a79ce9203424bbe1ab7573.dir
   path: pneumonia/models/ssd_mobilenet_v2/tested_images
